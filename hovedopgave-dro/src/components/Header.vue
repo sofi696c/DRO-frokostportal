@@ -8,7 +8,14 @@
   
         <!-- Midt-menu -->
         <nav class="nav">
-          <router-link to="/menuplaner">Menuplaner</router-link>
+          <router-link to="/menuplaner" class="nav-link">Menuplaner</router-link>
+          <router-link
+            v-if="role === 'admin'"
+            to="/opret-kunde"
+            class="create-customer-btn"
+          >
+            Opret ny kunde
+          </router-link>
         </nav>
   
         <!-- Højre brugerinfo og logout -->
@@ -31,7 +38,6 @@
   const { user, logout, displayName, role } = useUser();
   const router = useRouter();
   
-  // Funktion der både logger ud og redirecter
   const handleLogout = async () => {
     await logout();
     router.push('/');
@@ -63,13 +69,38 @@
     object-fit: contain;
   }
   
-  .nav a {
+  /* Nav-links */
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .nav-link {
     color: black;
     text-decoration: none;
     font-weight: 500;
     font-size: 1rem;
+    padding: 0.4rem 0.75rem;
   }
   
+  .nav-link:hover {
+    text-decoration: underline;
+  }
+  
+  .create-customer-btn {
+    background-color: #BC4D4D;
+    color: white !important;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .create-customer-btn:hover {
+    background-color: #a13737;
+  }
+  
+  /* Brugersektion */
   .user-actions {
     display: flex;
     align-items: center;
@@ -77,38 +108,37 @@
   }
   
   .user-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: #f2f2f2;
-  padding: 0.5rem 1.25rem;
-  height: 25%;
-  border-radius: 999px;
-  font-weight: 500;
-  font-size: 1rem;
-  box-shadow: #2a2a2a 0px 0px 1px 0px ;
-}
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #f2f2f2;
+    padding: 0.5rem 1.25rem;
+    height: 40px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 1rem;
+    box-shadow: #2a2a2a 0px 0px 1px 0px;
+  }
   
   .icon {
-  font-style: normal;
-  font-size: 1.2rem;
-  line-height: 1;
-}
+    font-style: normal;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
   
   .logout-btn {
-  background-color: #3e3e3e;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.25rem; /* Tilpas så det matcher .user-btn */
-  height: 40px; /* Matcher højden på .user-btn */
-  border-radius: 999px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-    }
-  
+    background-color: #3e3e3e;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    height: 40px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+  }
   .logout-btn:hover {
     background-color: #2a2a2a;
   }
