@@ -131,6 +131,7 @@
   };
   
   const submitOrder = async () => {
+    console.log('Submit bliver kaldt!');
     success.value = '';
     error.value = '';
     try {
@@ -147,6 +148,7 @@
       error.value = 'Noget gik galt. Prøv igen.';
     }
   };
+  
   </script>
   
   <style scoped>
