@@ -4,6 +4,7 @@
     </div>
   
     <div class="bestilling-container">
+  
       <div class="week-switcher">
         <button @click="prevWeek" class="arrow-btn">❮</button>
         <span class="week-text">Uge {{ currentWeek }} - {{ currentYear }}</span>
@@ -11,24 +12,28 @@
       </div>
   
       <h3>Bestilling til uge {{ currentWeek }} - {{ currentYear }}</h3>
+
+      <!-- Tabs til Frokost og Diverse -->
+      <div class="tab-switcher">
+        <button :class="{ active: activeTab === 'FROKOST' }" @click="activeTab = 'FROKOST'">Frokost</button>
+        <button :class="{ active: activeTab === 'DIVERSE' }" @click="activeTab = 'DIVERSE'">Diverse</button>
+      </div>
   
       <table>
         <thead>
-          <tr>
-            <th>Dag</th>
-            <th v-for="day in days" :key="day">{{ dayLabels[day] }}</th>
-          </tr>
+            <tr>
+                <th>Dag</th>
+                <th v-for="(day, index) in days" :key="day">
+                <div style="font-weight: 700;">{{ day }}</div>
+                <div>{{ dayLabels[day] }}</div>
+                </th>
+            </tr>
         </thead>
         <tbody>
-          <tr v-for="(type, index) in mealTypes" :key="index">
+          <tr v-for="(type, index) in currentMealTypes" :key="index">
             <td>{{ type.label }}</td>
             <td v-for="day in days" :key="day">
-              <input
-                type="number"
-                min="0"
-                v-model.number="orders[day][type.key]"
-                class="order-input"
-              />
+              <input type="number" min="0" v-model.number="orders[activeTab][day][type.key]" class="order-input" />
             </td>
           </tr>
         </tbody>
@@ -86,7 +91,7 @@
     return labels;
   });
   
-  const mealTypes = [
+  const mealTypesFrokost = [
     { label: 'Antal kuverter - Alm. frokost', key: 'alm_frokost' },
     { label: 'Antal kuverter - Vegetar', key: 'vegetar' },
     { label: 'Antal kuverter - Vegetar m. fisk', key: 'vegetar_fisk' },
@@ -95,16 +100,30 @@
     { label: 'Antal kuverter - aftentallerken', key: 'aftentallerken' }
   ];
   
-  const orders = ref({});
-  const success = ref('');
-  const error = ref('');
+  const mealTypesDiverse = [
+    { label: 'Antal protein salater', key: 'protein_salater' },
+    { label: 'Antal halve sandwiches', key: 'halve_sandwiches' },
+    { label: 'Antal hele sandwiches', key: 'hele_sandwiches' },
+    { label: 'Antal stk. frisk frugt', key: 'frisk_frugt' },
+    { label: 'Antal mælk (1L)', key: 'mælk' },
+    { label: 'Antal salatdreessing', key: 'salatdressing' },
+    { label: 'Antal smør (kasse á 100 stk.)', key: 'smør' }
+  ];
+  
+  const activeTab = ref('FROKOST');
+  const currentMealTypes = computed(() => activeTab.value === 'FROKOST' ? mealTypesFrokost : mealTypesDiverse);
+  
+  const orders = ref({ FROKOST: {}, DIVERSE: {} });
   
   function initOrders() {
-    orders.value = {};
-    days.forEach(day => {
-      orders.value[day] = {};
-      mealTypes.forEach(type => {
-        orders.value[day][type.key] = 0;
+    ['FROKOST', 'DIVERSE'].forEach(category => {
+      orders.value[category] = {};
+      days.forEach(day => {
+        orders.value[category][day] = {};
+        const types = category === 'FROKOST' ? mealTypesFrokost : mealTypesDiverse;
+        types.forEach(type => {
+          orders.value[category][day][type.key] = 0;
+        });
       });
     });
   }
@@ -130,8 +149,10 @@
     initOrders();
   };
   
+  const success = ref('');
+  const error = ref('');
+  
   const submitOrder = async () => {
-    console.log('Submit bliver kaldt!');
     success.value = '';
     error.value = '';
     try {
@@ -148,8 +169,8 @@
       error.value = 'Noget gik galt. Prøv igen.';
     }
   };
-  
   </script>
+  
   
   <style scoped>
   .page-header {
@@ -240,11 +261,11 @@
     color: white;
     padding: 0.75rem 2rem;
     border: none;
-    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
     display: block;
     font-size: 1rem;
+    border-radius: 6px;
   }
   
   button:hover {
@@ -268,4 +289,30 @@
     margin-top: 1rem;
     text-align: center;
   }
+
+  .tab-switcher {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem auto;
+  background-color: #f3f3f3;
+  border-radius: 20px;
+  overflow: hidden;
+  width: fit-content;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab-switcher button {
+  padding: 0.6rem 2rem;
+  border: none;
+  background-color: transparent;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color: #1f1f1f;
+}
+
+.tab-switcher button.active {
+  background-color: #bc4d4d;
+  color: white;
+}
   </style>

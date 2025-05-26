@@ -4,9 +4,9 @@
   
       <!-- Uge skifter -->
       <div class="week-switcher">
-        <button @click="prevWeek">&#x25C0;</button>
+        <button @click="prevWeek">◀</button>
         <span>Uge {{ currentWeek }} - {{ currentYear }}</span>
-        <button @click="nextWeek">&#x25B6;</button>
+        <button @click="nextWeek">▶</button>
       </div>
   
       <h3>Bestillinger uge {{ currentWeek }} - {{ currentYear }}</h3>
@@ -21,28 +21,32 @@
       <div v-if="selectedOverview">
         <h4 class="overview-title">Oversigt for {{ selectedLabel }}</h4>
         <button class="print-btn" @click="printOverview">Udskriv oversigt</button>
-        <table class="overview-table">
-          <thead>
-            <tr>
-              <th>Kunde</th>
-              <th v-for="type in mealTypes" :key="type">{{ type }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(data, customer) in selectedOverview" :key="customer">
-              <td>{{ customer }}</td>
-              <td v-for="type in mealTypes" :key="type">
-                <input type="number" :value="data[type] || 0" readonly />
-              </td>
-            </tr>
-            <tr class="total-row">
-              <td><strong>Total</strong></td>
-              <td v-for="type in mealTypes" :key="type">
-                <strong>{{ calculateTotal(type) }}</strong>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+  
+        <div v-for="(overview, category) in selectedOverview" :key="category">
+          <h5>{{ category === 'FROKOST' ? 'Frokost' : 'Diverse' }}</h5>
+          <table class="overview-table">
+            <thead>
+              <tr>
+                <th>Kunde</th>
+                <th v-for="type in categoryMealTypes[category]" :key="type">{{ type }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(data, customer) in overview" :key="customer">
+                <td>{{ customer }}</td>
+                <td v-for="type in categoryMealTypes[category]" :key="type">
+                  <input type="number" :value="data[type] || 0" readonly />
+                </td>
+              </tr>
+              <tr class="total-row">
+                <td><strong>Total</strong></td>
+                <td v-for="type in categoryMealTypes[category]" :key="type">
+                  <strong>{{ calculateTotal(overview, type) }}</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </template>
@@ -68,7 +72,10 @@
   
   const days = ['man', 'tir', 'ons', 'tor', 'fre'];
   const dayKeys = ['MAN', 'TIR', 'ONS', 'TOR', 'FRE'];
-  const mealTypes = ['alm_frokost', 'vegetar', 'vegetar_fisk', 'minus_svinekoed', 'fjerkrae_fisk', 'aftentallerken'];
+  const categoryMealTypes = {
+    FROKOST: ['alm_frokost', 'vegetar', 'vegetar_fisk', 'minus_svinekoed', 'fjerkrae_fisk', 'aftentallerken'],
+    DIVERSE: ['protein_salater', 'halve_sandwiches', 'hele_sandwiches', 'frisk_frugt', 'mælk', 'salatdressing', 'smør']
+  };
   
   const getMondayOfWeek = (week, year) => {
     const jan4 = new Date(year, 0, 4);
@@ -84,9 +91,7 @@
     for (let i = 0; i < 5; i++) {
       const date = new Date(start);
       date.setDate(start.getDate() + i);
-      labels.push(
-        `${days[i].charAt(0).toUpperCase() + days[i].slice(1)}dag d. ${date.getDate()}/${date.getMonth() + 1}`
-      );
+      labels.push(`${days[i].charAt(0).toUpperCase() + days[i].slice(1)}dag d. ${date.getDate()}/${date.getMonth() + 1}`);
     }
     return labels;
   });
@@ -117,17 +122,20 @@
   
   const showOverview = (dayIndex) => {
     const key = dayKeys[dayIndex];
-    const result = {};
+    const result = { FROKOST: {}, DIVERSE: {} };
     selectedLabel.value = dayLabels.value[dayIndex];
   
     orders.value.forEach(order => {
-      const meals = order.data[key];
-      if (meals) {
-        if (!result[order.customerName]) {
-          result[order.customerName] = {};
-        }
-        for (const type in meals) {
-          result[order.customerName][type] = (result[order.customerName][type] || 0) + meals[type];
+      const data = order.data;
+      for (const category in data) {
+        const meals = data[category][key];
+        if (meals) {
+          if (!result[category][order.customerName]) {
+            result[category][order.customerName] = {};
+          }
+          for (const type in meals) {
+            result[category][order.customerName][type] = (result[category][order.customerName][type] || 0) + meals[type];
+          }
         }
       }
     });
@@ -135,10 +143,10 @@
     selectedOverview.value = result;
   };
   
-  const calculateTotal = (type) => {
+  const calculateTotal = (overview, type) => {
     let total = 0;
-    for (const customer in selectedOverview.value) {
-      total += selectedOverview.value[customer][type] || 0;
+    for (const customer in overview) {
+      total += overview[customer][type] || 0;
     }
     return total;
   };
@@ -162,7 +170,7 @@
   };
   
   const printOverview = () => {
-    const printContent = document.querySelector('.overview-table').outerHTML;
+    const content = document.querySelector('.overview-title').outerHTML + document.querySelectorAll('.overview-table')[0].outerHTML + (document.querySelectorAll('.overview-table')[1]?.outerHTML || '');
     const win = window.open('', '', 'width=900,height=700');
     win.document.write(`
       <html>
@@ -170,7 +178,7 @@
           <title>Udskriv oversigt</title>
           <style>
             body { font-family: sans-serif; padding: 2rem; }
-            h2 { text-transform: uppercase; font-size: 1.2rem; margin-bottom: 1rem; }
+            h2, h4, h5 { text-transform: uppercase; font-size: 1.1rem; margin-bottom: 1rem; }
             table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
             th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
             th { background-color: #f4f4f4; }
@@ -178,8 +186,7 @@
           </style>
         </head>
         <body>
-          <h2>Oversigt for ${selectedLabel.value}</h2>
-          ${printContent}
+          ${content}
         </body>
       </html>
     `);
@@ -288,7 +295,7 @@
   }
   
   .print-btn {
-    background-color: #4d4d4d;
+    background-color: #1F2129;
     color: white;
     padding: 0.5rem 1.25rem;
     border: none;
@@ -298,6 +305,7 @@
     cursor: pointer;
   }
   .print-btn:hover {
-    background-color: #333;
+    background-color: #050507;
   }
   </style>
+  

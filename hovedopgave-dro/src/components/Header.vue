@@ -8,7 +8,6 @@
   
         <!-- Midt-menu -->
         <nav class="nav">
-          <router-link to="/menuplaner" class="nav-link">Menuplaner</router-link>
           <router-link
             v-if="role === 'admin'"
             to="/opret-kunde"
@@ -127,7 +126,7 @@
   }
   
   .logout-btn {
-    background-color: #3e3e3e;
+    background-color: #1F2129;
     color: white;
     border: none;
     padding: 0.5rem 1.25rem;
@@ -140,7 +139,7 @@
     align-items: center;
   }
   .logout-btn:hover {
-    background-color: #2a2a2a;
+    background-color: #010101;
   }
   </style>
   

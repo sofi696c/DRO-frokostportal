@@ -70,6 +70,7 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     position: relative;
     z-index: 2;
+    padding-right: 8vh;
   }
   
   h1 {
@@ -84,7 +85,6 @@
   
   .bold {
     font-weight: bold;
-    color: #8B0000;
   }
   
   input {
@@ -98,7 +98,7 @@
   
   button {
     padding: 0.75rem 1.25rem;
-    background-color: #8B0000;
+    background-color: #B05552;
     color: white;
     border: none;
     border-radius: 6px;
@@ -106,10 +106,11 @@
     cursor: pointer;
     width: 100%;
     transition: background-color 0.3s;
+    margin-left: 2vh
   }
   
   button:hover {
-    background-color: #a40000;
+    background-color: #a13737;
   }
   
   .error {
