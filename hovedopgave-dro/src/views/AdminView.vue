@@ -134,7 +134,8 @@
             result[category][order.customerName] = {};
           }
           for (const type in meals) {
-            result[category][order.customerName][type] = (result[category][order.customerName][type] || 0) + meals[type];
+            result[category][order.customerName][type] = (result[category]
+            [order.customerName][type] || 0) + meals[type];
           }
         }
       }
@@ -170,7 +171,9 @@
   };
   
   const printOverview = () => {
-    const content = document.querySelector('.overview-title').outerHTML + document.querySelectorAll('.overview-table')[0].outerHTML + (document.querySelectorAll('.overview-table')[1]?.outerHTML || '');
+    const content = document.querySelector('.overview-title').outerHTML + 
+                    document.querySelectorAll('.overview-table')[0].outerHTML + 
+                    (document.querySelectorAll('.overview-table')[1]?.outerHTML || '');
     const win = window.open('', '', 'width=900,height=700');
     win.document.write(`
       <html>
@@ -308,4 +311,3 @@
     background-color: #050507;
   }
   </style>
-  
